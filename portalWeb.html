@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografía de Prompts por Carrera</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: slideDown 0.6s ease;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 30px;
+            animation: slideUp 0.6s ease 0.2s both;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid white;
+            background: transparent;
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: white;
+            color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            animation: fadeIn 0.8s ease 0.3s both;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            opacity: 0;
+            animation: cardAppear 0.5s ease both;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .card-header {
+            padding: 20px;
+            color: white;
+            font-size: 1.4em;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .card-content {
+            padding: 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+
+        .card.active .card-content {
+            max-height: 1000px;
+        }
+
+        .prompt-category {
+            margin-bottom: 15px;
+        }
+
+        .prompt-category h3 {
+            color: #333;
+            font-size: 0.95em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .prompt-list {
+            list-style: none;
+        }
+
+        .prompt-item {
+            background: #f8f9ff;
+            margin-bottom: 8px;
+            padding: 10px 12px;
+            border-left: 4px solid;
+            border-radius: 4px;
+            font-size: 0.85em;
+            line-height: 1.4;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .prompt-item:hover {
+            background: #eef0ff;
+            transform: translateX(5px);
+        }
+
+        .toggle-btn {
+            width: 100%;
+            padding: 15px;
+            background: #f0f0f0;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .toggle-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .card.active .toggle-btn {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Colores por carrera */
+        .enfermeria { --color: #e74c3c; }
+        .medicina { --color: #3498db; }
+        .derecho { --color: #f39c12; }
+        .ingenieria { --color: #2ecc71; }
+        .psicologia { --color: #9b59b6; }
+        .contaduria { --color: #e67e22; }
+
+        .enfermeria .card-header { background: var(--color); }
+        .enfermeria .prompt-item { border-left-color: var(--color); }
+
+        .medicina .card-header { background: var(--color); }
+        .medicina .prompt-item { border-left-color: var(--color); }
+
+        .derecho .card-header { background: var(--color); }
+        .derecho .prompt-item { border-left-color: var(--color); }
+
+        .ingenieria .card-header { background: var(--color); }
+        .ingenieria .prompt-item { border-left-color: var(--color); }
+
+        .psicologia .card-header { background: var(--color); }
+        .psicologia .prompt-item { border-left-color: var(--color); }
+
+        .contaduria .card-header { background: var(--color); }
+        .contaduria .prompt-item { border-left-color: var(--color); }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-buttons {
+                gap: 8px;
+            }
+
+            .filter-btn {
+                padding: 8px 15px;
+                font-size: 0.85em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Prompts Personalizados por Carrera</h1>
+            <p>Guía exclusiva para egresados del Campus UCC Santa Marta</p>
+        </div>
+
+        <div class="filter-buttons">
+            <button class="filter-btn active" onclick="filterCards('todos')">Todas las carreras</button>
+            <button class="filter-btn" onclick="filterCards('enfermeria')">Enfermería</button>
+            <button class="filter-btn" onclick="filterCards('medicina')">Medicina</button>
+            <button class="filter-btn" onclick="filterCards('derecho')">Derecho</button>
+            <button class="filter-btn" onclick="filterCards('ingenieria')">Ingeniería</button>
+            <button class="filter-btn" onclick="filterCards('psicologia')">Psicología</button>
+            <button class="filter-btn" onclick="filterCards('contaduria')">Contaduría</button>
+        </div>
+
+        <div class="cards-grid" id="cardsContainer">
+            <!-- Cards generadas por JavaScript -->
+        </div>
+
+        <div class="footer">
+            <p>💡 Recuerda: Usa estos prompts como borrador, no como reemplazo de tu criterio profesional</p>
+        </div>
+    </div>
+
+    <script>
+        const data = {
+            enfermeria: {
+                nombre: '👩‍⚕️ Enfermería',
+                categorias: {
+                    'Práctica Clínica': [
+                        'Genera un plan de cuidados de enfermería para un paciente con [diagnóstico] siguiendo el modelo NANDA-NIC-NOC.',
+                        'Explícame las consideraciones de enfermería al administrar [medicamento], incluyendo monitoreo, contraindicaciones y educación al paciente.',
+                        'Resume en lenguaje simple cómo educar a un paciente sobre el manejo de [enfermedad crónica].',
+                        'Elabora un protocolo de enfermería para la vigilancia de signos vitales en pacientes con [condición].',
+                        'Crea una guía de educación para cuidadores sobre cómo asistir a un paciente con [limitación física].'
+                    ],
+                    'Investigación': [
+                        'Ayúdame a formular una pregunta de investigación en enfermería basada en el enfoque PICO sobre [tema].',
+                        'Realiza una búsqueda bibliográfica actualizada sobre intervenciones de enfermería para [condición].',
+                        'Propón una metodología para un estudio descriptivo sobre la incidencia de [evento adverso] en una institución hospitalaria.',
+                        'Explica cómo analizar datos cualitativos en investigación de enfermería con el método [método].'
+                    ]
+                }
+            },
+            medicina: {
+                nombre: '👨‍⚕️ Medicina',
+                categorias: {
+                    'Prompts Clínicos': [
+                        'Haz un diagnóstico diferencial para un paciente que presenta [síntomas], indicando posibles estudios a solicitar.',
+                        'Explica el mecanismo de acción, efectos adversos y contraindicaciones de [fármaco] de forma clara.',
+                        'Genera un resumen clínico tipo nota médica a partir de esta información: [pegar datos del paciente].',
+                        'Crea un algoritmo de manejo inicial para un paciente con [emergencia médica].',
+                        'Describe criterios de hospitalización para pacientes con [diagnóstico].'
+                    ],
+                    'Prompts Académicos': [
+                        'Resume en evidencia actualizada el manejo de primera línea para [patología].',
+                        'Genera preguntas tipo estudio para repasar [tema de medicina].',
+                        'Explica con analogías sencillas la fisiopatología de [enfermedad] para estudiantes de primer semestre.',
+                        'Elabora un cuadro comparativo entre los distintos tratamientos disponibles para [condición].'
+                    ]
+                }
+            },
+            derecho: {
+                nombre: '⚖️ Derecho',
+                categorias: {
+                    'Análisis Jurídico': [
+                        'Realiza un análisis jurídico de un caso donde [descripción del caso], basándote en la legislación colombiana vigente.',
+                        'Explica de manera clara los elementos de [figura jurídica] y su aplicación en Colombia.',
+                        'Realiza un análisis constitucional sobre la posible vulneración de derechos en un caso de [situación].',
+                        'Crea una línea jurisprudencial sobre [tema] con las sentencias más relevantes.'
+                    ],
+                    'Redacción y Argumentación': [
+                        'Redacta un derecho de petición formal sobre [tema].',
+                        'Elabora un alegato persuasivo para un caso de [tema], siguiendo estructura lógica y normativa aplicable.',
+                        'Simplifica este concepto jurídico para explicarlo a un cliente: [concepto].',
+                        'Redacta una cláusula contractual que regule [tema] siguiendo buenas prácticas legales.',
+                        'Crea preguntas para una entrevista jurídica inicial sobre un caso de [tipo de caso].'
+                    ]
+                }
+            },
+            ingenieria: {
+                nombre: '⚙️ Ingeniería',
+                categorias: {
+                    'Prompts Técnicos': [
+                        'Diseña un diagrama conceptual para un sistema que realice [función], incluyendo módulos y flujos de datos.',
+                        'Genera código en [lenguaje] que resuelva [problema].',
+                        'Explica cómo optimizar un proceso de [tema] según buenas prácticas de ingeniería.',
+                        'Propón una arquitectura escalable para una aplicación que debe manejar [volumen de datos/usuarios].',
+                        'Evalúa diferentes alternativas tecnológicas para implementar [solución] y justifica la mejor opción.'
+                    ],
+                    'Prompts para Proyectos': [
+                        'Crea una estructura EDT para un proyecto de ingeniería cuyo objetivo es [describir objetivo].',
+                        'Genera un informe técnico profesional basado en los siguientes datos: [insertar datos].',
+                        'Elabora un cronograma estimado para un proyecto que involucra [tecnología/proceso].'
+                    ]
+                }
+            },
+            psicologia: {
+                nombre: '🧠 Psicología',
+                categorias: {
+                    'Prompts Clínicos': [
+                        'Elabora un plan de intervención psicológica para un paciente con [trastorno], basado en el modelo [CBT, ACT, etc.].',
+                        'Genera preguntas de evaluación clínica para explorar [síntoma o área].',
+                        'Resume estrategias de psicoeducación para un paciente con [diagnóstico].',
+                        'Crea un informe psicológico estructurado basado en la siguiente información: [datos del paciente].',
+                        'Diseña un protocolo breve de intervención en crisis para un caso de [situación crítica].'
+                    ],
+                    'Prompts para Investigación': [
+                        'Ayúdame a diseñar una escala de medición para evaluar [constructo psicológico].',
+                        'Explica teorías psicológicas asociadas a [tema] con ejemplos prácticos.',
+                        'Plantea hipótesis y variables para un estudio experimental sobre [tema].',
+                        'Propón técnicas de análisis estadístico adecuadas para un estudio correlacional sobre [constructo].'
+                    ]
+                }
+            },
+            contaduria: {
+                nombre: '📊 Contaduría Pública',
+                categorias: {
+                    'Prompts Contables': [
+                        'Explica el tratamiento contable de [transacción] bajo NIIF para pymes.',
+                        'Genera los estados financieros con base en esta información: [insertar datos].',
+                        'Compara el impacto tributario de dos escenarios: [escenario A] vs. [escenario B].',
+                        'Realiza un análisis financiero completo (liquidez, endeudamiento, rentabilidad) con los siguientes datos: [datos].',
+                        'Propón el registro contable adecuado para una operación de [tipo de operación] según NIIF completas.'
+                    ],
+                    'Prompts Administrativos': [
+                        'Crea un plan de control interno para una empresa del sector [sector].',
+                        'Diseña un informe profesional de auditoría basado en los siguientes hallazgos: [contenido].',
+                        'Elabora un flujo de procesos para el área contable de una empresa de [tipo de negocio].',
+                        'Genera un checklist de auditoría para evaluar el cumplimiento de obligaciones tributarias en Colombia.'
+                    ]
+                }
+            }
+        };
+
+        let currentFilter = 'todos';
+
+        function renderCards() {
+            const container = document.getElementById('cardsContainer');
+            container.innerHTML = '';
+
+            const careersToShow = currentFilter === 'todos' ? Object.keys(data) : [currentFilter];
+
+            careersToShow.forEach((carrera, index) => {
+                const career = data[carrera];
+                const card = document.createElement('div');
+                card.className = `card ${carrera}`;
+                card.style.animationDelay = `${index * 0.1}s`;
+
+                let categoriesHTML = '';
+                for (const [category, prompts] of Object.entries(career.categorias)) {
+                    const promptsHTML = prompts.map(prompt => 
+                        `<li class="prompt-item" onclick="copyToClipboard(event)">${prompt}</li>`
+                    ).join('');
+                    
+                    categoriesHTML += `
+                        <div class="prompt-category">
+                            <h3>${category}</h3>
+                            <ul class="prompt-list">
+                                ${promptsHTML}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="card-header">${career.nombre}</div>
+                    <div class="card-content">
+                        ${categoriesHTML}
+                    </div>
+                    <button class="toggle-btn" onclick="toggleCard(this)">Expandir</button>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        function toggleCard(button) {
+            const card = button.parentElement;
+            card.classList.toggle('active');
+            button.textContent = card.classList.contains('active') ? 'Contraer' : 'Expandir';
+        }
+
+        function filterCards(carrera) {
+            currentFilter = carrera;
+            
+            // Actualizar botones activos
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            renderCards();
+        }
+
+        function copyToClipboard(event) {
+            const text = event.target.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = event.target.textContent;
+                event.target.textContent = '✓ ¡Copiado!';
+                event.target.style.background = '#d4edda';
+                
+                setTimeout(() => {
+                    event.target.textContent = originalText;
+                    event.target.style.background = '';
+                }, 2000);
+            });
+        }
+
+        // Inicializar
+        renderCards();
+    </script>
+</body>
+</html>
